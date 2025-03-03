@@ -1,62 +1,29 @@
 /* eslint-disable react/prop-types */
-const Header = ({course}) => {
-  return (
-    <>
-      <h1>{course}</h1>
-    </>
-  )
-}
 
-const Part = ({part}) => {
-  return (
-    <>
-      <p>{part.name} {part.exercises}</p>
-    </>
-  )
-}
+import { useState } from 'react';
 
-const Content = ({parts}) => {
-  return (
-    <>
-      <Part part={parts[0]} />
-      <Part part={parts[1]} />
-      <Part part={parts[2]} />
-    </>
-  )
-}
+const Button = (props) => (
+  <button onClick={props.onClick}>
+    {props.text}
+  </button>
+)
 
-const Total = ({parts}) => {
-  return (
-    <>
-      <p>Number of exercises {parts[0].exercises + parts[1].exercises + parts[2].exercises}</p>
-    </>
-  )
-}
+const Display = props => <div>{props.value}</div>
 
 const App = () => {
-  const course = {
-    name: 'Half Stack application development',
-    parts: [
-      {
-        name: 'Fundamentals of React',
-        exercises: 10
-      },
-      {
-        name: 'Using props to pass data',
-        exercises: 7
-      },
-      {
-        name: 'State of a component',
-        exercises: 14
-      }
-    ]
+  const [value, setValue] = useState(10)
+
+  const setToValue = (newValue) => {
+    console.log('value now', newValue)
+    setValue(newValue)
   }
 
   return (
     <div>
-      <Header course={course.name}/>
-      <Content parts={course.parts}/>
-      <Total parts={course.parts}/>
+      <Display value={value} />
+      <Button onClick={() => setToValue(1000)} text="thousand" />
+      <Button onClick={() => setToValue(0)} text="reset" />
+      <Button onClick={() => setToValue(value + 1)} text="increment" />
     </div>
   )
 }
