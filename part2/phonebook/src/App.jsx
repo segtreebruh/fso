@@ -1,43 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-
-const Filter = ({ value, setValue }) => {
-  return (
-    <div>
-      search: <input type="text" value={value} onChange={(e) => setValue(e.target.value)} />
-    </div>
-  );
-};
-
-const PersonForm = ({ fields, onSubmit }) => {
-  return (
-    <>
-      <form onSubmit={onSubmit}>
-        {fields.map(({ id, label, value, setValue }) => (
-          <div key={id}>
-            {label}: <input type="text" value={value} onChange={(e) => setValue(e.target.value)} />
-          </div>
-        ))}
-        <button type="submit">add</button>
-      </form>
-    </>
-  );
-};
-
-const Persons = ({ persons }) => {
-  if (persons.length === 0) {
-    return (
-      <div>No entries found</div>
-    )
-  }
-  return (
-    <ul>
-      {persons.map(person => (
-        <li key={person.id}>{person.name} {person.number}</li>
-      ))}
-    </ul>
-  )
-}
+import phonebook from './services/phonebook';
+import { Filter, PersonForm, Persons } from './components/display'
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -47,15 +10,11 @@ const App = () => {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('promise fulfilled')
-        setPersons(response.data)
-      })
+    console.log('effect');
+
+    phonebook.getAll()
+      .then(response => setPersons(response));
   }, [])
-  console.log('render', persons.length, 'notes')
 
   const addName = (event) => {
     event.preventDefault();
@@ -63,22 +22,35 @@ const App = () => {
       alert('Invalid name/number');
       return;
     }
-    if (persons.some(person => (person.name === newName || person.number === newNumber))) {
-      alert(`${newName} is already added to phonebook`);
+
+    const nameObject = {
+      name: newName,
+      number: newNumber
+    };
+
+    const duplicate = persons.find(person => person.name === newName);
+    if (duplicate !== undefined) {
+      if (window.confirm(`The name "${newName}" already existed. Do you want to update the number?`)) {
+        phonebook.updateEntry(duplicate.id, nameObject)
+        .then(response => {
+          setPersons(persons.map(person => person.name === newName ? response : person))
+        })
+        .catch(() => {
+          alert(`Unable to update entry "${duplicate.name}`);
+        });
+      }
       setNewName('');
       setNewNumber('');
       return;
     }
 
-    const nameObject = {
-      id: persons.length + 1,
-      name: newName,
-      number: newNumber
-    };
-
-    setPersons(persons.concat(nameObject));
-    setNewName('');
-    setNewNumber('');
+    console.log(nameObject);
+    phonebook.createEntry(nameObject)
+      .then(response => {
+        setPersons(persons.concat(response));
+        setNewName('');
+        setNewNumber('');
+      });
   }
 
   const fields = [
@@ -91,6 +63,16 @@ const App = () => {
     return persons.filter(person => person.name.toLowerCase().includes(search.toLowerCase()));
   };
 
+  const handleDelete = personToDelete => {
+    phonebook.deleteEntry(personToDelete.id)
+    .then(() => {
+      setPersons(persons.filter(person => person.id !== personToDelete.id));
+    })
+    .catch(() => {
+      alert(`Could not delete ${personToDelete.name} from the database`);
+    });
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -98,7 +80,7 @@ const App = () => {
       <h3>Add new entries</h3>
       <PersonForm fields={fields} onSubmit={addName} />
       <h3>Numbers</h3>
-      <Persons persons={searchFilter()} />
+      <Persons persons={searchFilter()} handleDelete={handleDelete}/>
     </div>
   );
 }
