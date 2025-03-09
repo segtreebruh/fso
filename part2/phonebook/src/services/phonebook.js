@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const baseUrl = '/api/persons'
+const baseUrl = 'http://localhost:3001/persons'
 
 const createEntry = person => {
     const request = axios.post(baseUrl, person);
