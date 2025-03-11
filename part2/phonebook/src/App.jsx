@@ -18,15 +18,6 @@ const App = () => {
 
   const addName = (event) => {
     event.preventDefault();
-    if (newName.length === 0 || newNumber.length === 0) {
-      // alert('Invalid name/number');
-      setNotification({
-        msg: `Invalid name/number. Please check your information carefully`,
-        type: 'error'
-      })
-      setTimeout(() => setNotification(null), 5000);
-      return;
-    }
 
     const nameObject = {
       name: newName,
@@ -46,10 +37,10 @@ const App = () => {
             console.log(notification);
             setTimeout(() => setNotification(null), 5000);
           })
-          .catch(() => {
+          .catch(error => {
             // alert(`Unable to update entry "${duplicate.name}`);
             setNotification({
-              msg: `Unable to update entry ${duplicate.name}`,
+              msg: `Unable to update entry ${duplicate.name}: ${error.error}`,
               type: 'error'
             });
             setTimeout(() => setNotification(null), 5000);
@@ -72,7 +63,16 @@ const App = () => {
           type: 'success'
         });
         setTimeout(() => setNotification(null), 5000);
-      });
+      })
+      .catch(error => {
+        setNewName('');
+        setNewNumber('');
+        setNotification({
+          msg: error.error,
+          type: 'error'
+        });
+        setTimeout(() => setNotification(null), 5000);
+      })
   }
 
   const fields = [
