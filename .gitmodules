@@ -7,3 +7,6 @@
 [submodule "fso-part5"]
 	path = fso-part5
 	url = https://github.com/segtreebruh/fso-part5
+[submodule "part5"]
+	path = part5
+	url = https://github.com/segtreebruh/fso-part5
