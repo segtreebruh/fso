@@ -13,3 +13,6 @@
 [submodule "part11"]
 	path = part11
 	url = git@github.com:segtreebruh/fso-part11.git
+[submodule "part12"]
+	path = part12
+	url = https://github.com/segtreebruh/part12.git
